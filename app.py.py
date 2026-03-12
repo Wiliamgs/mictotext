@@ -6,30 +6,27 @@ from datetime import datetime
 
 # --- CONFIGURAÇÃO DA PÁGINA (PADRÃO NEUROINTEGRANDO) ---
 st.set_page_config(
-    page_title="Gerador de Relatórios - Neurointegrando",
+    page_title="Mic To Text - Neurointegrando",
     page_icon="📋",
-    layout="centered"  # O site original é centralizado e não wide
+    layout="centered"
 )
 
 # --- CSS PARA COPIAR O LAYOUT DO SITE ORIGINAL ---
 st.markdown("""
     <style>
-    /* Importando fonte similar à do site */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
-        background-color: #f4f7f6; /* Fundo cinza claro do site original */
+        background-color: #f4f7f6;
     }
 
-    /* Cabeçalho principal */
     .main-header {
         text-align: center;
         padding: 20px 0;
         color: #1a2a3a;
     }
 
-    /* Estilização dos Containers (Simulando os cards de upload) */
     div[data-testid="stVerticalBlock"] > div:has(div.stAlert) {
         background-color: white;
         padding: 20px;
@@ -38,12 +35,11 @@ st.markdown("""
         border: 1px solid #e0e0e0;
     }
 
-    /* Botão Principal (Azul escuro do site original) */
     .stButton>button {
         width: 100%;
         border-radius: 8px;
         height: 50px;
-        background-color: #1e3a5a; /* Tom de azul do Gerador de Relatórios */
+        background-color: #1e3a5a;
         color: white;
         font-weight: 600;
         font-size: 16px;
@@ -53,18 +49,16 @@ st.markdown("""
 
     .stButton>button:hover {
         background-color: #2c5282;
-        border: none;
         color: white;
     }
 
-    /* Área de Texto (Evolução) */
     .stTextArea textarea {
         border-radius: 8px !important;
         border: 1px solid #ced4da !important;
         background-color: #ffffff !important;
+        font-size: 16px;
     }
 
-    /* Ajuste de labels e subtitulos */
     h1, h2, h3 {
         color: #1e3a5a !important;
         font-weight: 700 !important;
@@ -72,21 +66,21 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CARREGAMENTO DO MODELO (WHISPER) ---
+# --- CARREGAMENTO DO MODELO (USANDO SMALL PARA MAIOR PRECISÃO) ---
 @st.cache_resource
 def load_model():
-    return whisper.load_model("base")
+    # Trocamos para 'small' para resolver as 'coisas aleatórias' que as cobaias relataram
+    return whisper.load_model("small")
 
 model = load_model()
 
-# --- CONTEÚDO VISUAL (COPIANDO O HEADER DO SITE) ---
-st.markdown('<div class="main-header"><h1>Gerador de Relatórios</h1><p>Neurointegrando</p></div>', unsafe_allow_html=True)
+# --- CONTEÚDO VISUAL ---
+st.markdown('<div class="main-header"><h1>Mic To Text</h1><p>Neurointegrando</p></div>', unsafe_allow_html=True)
 
-# Bloco de Instrução/Status
-st.info("🎙️ **Transcritor de Evoluções**: Fale o relato da sessão abaixo para gerar o texto automaticamente.")
+st.info("🎙️ **Transcrever Evoluções**: Faça o relato da sessão de hoje.")
 
-# --- ESTRUTURA DE PASSO A PASSO (Igual ao site original) ---
-st.markdown("### 1. Relate a Evolução (Fale agora)")
+# --- PASSO 1: GRAVAÇÃO ---
+st.markdown("### 1. Relato da Evolução (Fale agora)")
 audio_data = mic_recorder(
     start_prompt="🔴 Iniciar Gravação de Voz",
     stop_prompt="⏹️ Finalizar e Processar",
@@ -97,32 +91,51 @@ audio_data = mic_recorder(
 if audio_data:
     st.audio(audio_data['bytes'])
     
-    with st.spinner("Transformando sua fala em texto..."):
+    with st.spinner("🤖 Processando fala com alta precisão..."):
         temp_file = "temp_audio_clinica.wav"
         with open(temp_file, "wb") as f:
             f.write(audio_data['bytes'])
         
-        # Transcrição
-        result = model.transcribe(temp_file, fp16=False, language="pt")
+        # PROMPT: Guia a IA para o vocabulário da clínica e evita erros comuns
+        contexto_clinico = "Evolução clínica, prontuário, paciente, terapia, sessão, conduta terapêutica, queixa, desenvolvimento, TEA, ABA, psicóloga."
+        
+        # Transcrição Otimizada
+        result = model.transcribe(
+            temp_file, 
+            fp16=False, 
+            language="pt",
+            temperature=0.0,
+            initial_prompt=contexto_clinico
+        )
+        
         texto_gerado = result["text"].strip()
         os.remove(temp_file)
 
+    # --- PASSO 2: RESULTADO ---
     st.markdown("### 2. Resultado da Transcrição")
-    # Campo de texto para o terapeuta editar/copiar
     texto_final = st.text_area(
-        label="Texto pronto para copiar e colar no prontuário:",
+        label="Texto pronto para copiar:",
         value=texto_gerado,
-        height=300
+        height=350
     )
 
-    # Botão de ação (Inspirado no botão "Gerar e Baixar" do site original)
-    if st.button("🗑️ Limpar para Novo Relato"):
+    if st.button("🗑️ Limpar"):
         st.rerun()
 
-    st.success("💡 Dica: Selecione o texto acima, use Ctrl+C e cole diretamente no sistema de evoluções.")
+    st.success("💡 Dica: Selecione o texto, copie e cole na evolução do paciente (Átrio).")
 else:
     st.write("---")
-    st.caption("Aguardando entrada de áudio para gerar o relatório...")
+    st.caption("Aguardando gravação para gerar o relatório...")
 
 # --- FOOTER ---
-st.markdown("<br><hr><center><p style='color: #6c757d;'>Sistema de Apoio Clínico - Neurointegrando</p></center>", unsafe_allow_html=True)
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("""
+    <div style="text-align: center; color: #6c757d; font-family: 'Inter', sans-serif;">
+        <p style="margin-bottom: 5px;">
+            🔒 Sua segurança é nossa prioridade. Nenhum arquivo é enviado ou armazenado.
+        </p>
+        <p style="font-style: italic; font-size: 0.9em;">
+            Feito com Carinho pela Equipe Administrativa da Clinica Neurointegrando.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
