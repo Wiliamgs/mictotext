@@ -11,7 +11,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS: ATAQUE TOTAL À FAIXA BRANCA E AJUSTES VISUAIS ---
+# --- CSS: CUSTOMIZAÇÃO DO BOTÃO DE GRAVAÇÃO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -27,25 +27,26 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* 2. REMOVER A FAIXA BRANCA (BLOQUEIO AGRESSIVO) */
-    /* Remove fundo de qualquer div que contenha o gravador ou botões */
-    div[data-testid="stVerticalBlock"] > div {
-        background-color: transparent !important;
-    }
-    
-    /* Alvo específico no container do componente mic_recorder */
+    /* 2. ESTICAR O BOTÃO DE GRAVAR E ARREDONDAR CANTOS */
+    /* Aqui a gente "domina" a barra branca e a deixa bonita */
     div.element-container:has(iframe) {
-        background-color: transparent !important;
-        border: none !important;
+        background-color: white !important;
+        border-radius: 20px !important; /* Cantos bem arredondados */
+        padding: 10px !important;
+        border: 1px solid #e0e0e0 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+        display: flex;
+        justify-content: center;
+        width: 100% !important; /* Estica para ocupar a largura do card */
     }
 
     iframe {
-        background-color: transparent !important;
+        border-radius: 15px !important;
     }
 
     /* 3. ÁREA DE TEXTO E RESULTADOS */
     .stTextArea textarea {
-        border-radius: 8px !important;
+        border-radius: 12px !important;
         border: 1px solid #ced4da !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
         color: #1a2a3a !important;
@@ -61,10 +62,10 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
-    /* 4. BOTÃO LIMPAR (MODO CLARO PARA VISIBILIDADE) */
+    /* 4. BOTÃO LIMPAR */
     .stButton>button {
         width: 140px !important;
-        border-radius: 8px !important;
+        border-radius: 12px !important;
         background-color: white !important;
         color: #1e3a5a !important;
         font-weight: 700 !important;
@@ -94,14 +95,14 @@ st.info("🎙️ **Transcrever Evoluções**: Faça o relato da sessão de hoje.
 
 st.markdown("### 1. Relato da Evolução (Fale agora)")
 
-# MELHORIA TÉCNICA: Gerar uma chave única para o gravador não "viciar"
 if 'recorder_key' not in st.session_state:
     st.session_state.recorder_key = 0
 
+# Gravador ocupando a largura disponível
 audio_data = mic_recorder(
     start_prompt="🔴 Iniciar Gravação de Voz",
     stop_prompt="⏹️ Finalizar e Processar",
-    key=f'recorder_{st.session_state.recorder_key}', # Chave dinâmica
+    key=f'recorder_{st.session_state.recorder_key}',
     just_once=True
 )
 
@@ -109,7 +110,6 @@ if audio_data:
     st.audio(audio_data['bytes'])
     
     with st.spinner("🤖 Processando fala..."):
-        # Nome de arquivo único para evitar conflito de leitura/escrita
         temp_file = f"temp_{int(time.time())}.wav"
         with open(temp_file, "wb") as f:
             f.write(audio_data['bytes'])
@@ -120,13 +120,12 @@ if audio_data:
             temp_file, 
             fp16=False, 
             language="pt",
-            temperature=0.0, # Força a IA a ser literal e não "inventar"
+            temperature=0.0,
             initial_prompt=contexto_clinico
         )
         
         texto_gerado = result["text"].strip()
         
-        # Limpeza do arquivo temporário
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
@@ -138,7 +137,7 @@ if audio_data:
     )
 
     if st.button("🗑️ Limpar"):
-        st.session_state.recorder_key += 1 # Muda a chave do gravador para resetar o componente
+        st.session_state.recorder_key += 1
         st.rerun()
 
     st.success("💡 Dica: Selecione o texto, copie e cole na evolução do paciente (Átrio).")
