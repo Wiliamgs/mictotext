@@ -11,7 +11,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS: CUSTOMIZAÇÃO DO BOTÃO DE GRAVAÇÃO ---
+# --- CSS: PADRONIZAÇÃO E AJUSTE DO GRAVADOR ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -27,45 +27,45 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* 2. ESTICAR O BOTÃO DE GRAVAR E ARREDONDAR CANTOS */
-    /* Aqui a gente "domina" a barra branca e a deixa bonita */
+    /* 2. AJUSTE DA BARRA DO GRAVADOR (PADRONIZANDO COM OS CARDS) */
     div.element-container:has(iframe) {
         background-color: white !important;
-        border-radius: 20px !important; /* Cantos bem arredondados */
-        padding: 10px !important;
+        border-radius: 8px !important; /* Cantos padronizados com os demais */
+        padding: 5px !important;
         border: 1px solid #e0e0e0 !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-        display: flex;
-        justify-content: center;
-        width: 100% !important; /* Estica para ocupar a largura do card */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        width: 100% !important;
     }
 
+    /* Forçando o conteúdo do iframe a se alinhar à esquerda e ocupar espaço */
     iframe {
-        border-radius: 15px !important;
+        width: 100% !important;
+        height: 60px !important;
     }
 
     /* 3. ÁREA DE TEXTO E RESULTADOS */
     .stTextArea textarea {
-        border-radius: 12px !important;
+        border-radius: 8px !important;
         border: 1px solid #ced4da !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
         color: #1a2a3a !important;
         font-size: 16px !important;
     }
 
+    /* Container de Alerta/Info (Padrão de Vidro) */
     div[data-testid="stVerticalBlock"] > div:has(div.stAlert) {
         background-color: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(10px);
         padding: 25px;
-        border-radius: 16px;
+        border-radius: 8px; /* Cantos padronizados */
         box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
-    /* 4. BOTÃO LIMPAR */
+    /* 4. BOTÕES (REINICIAR / LIMPAR) */
     .stButton>button {
         width: 140px !important;
-        border-radius: 12px !important;
+        border-radius: 8px !important;
         background-color: white !important;
         color: #1e3a5a !important;
         font-weight: 700 !important;
@@ -98,7 +98,7 @@ st.markdown("### 1. Relato da Evolução (Fale agora)")
 if 'recorder_key' not in st.session_state:
     st.session_state.recorder_key = 0
 
-# Gravador ocupando a largura disponível
+# Gravador de áudio
 audio_data = mic_recorder(
     start_prompt="🔴 Iniciar Gravação de Voz",
     stop_prompt="⏹️ Finalizar e Processar",
