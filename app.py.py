@@ -11,14 +11,20 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS PARA COPIAR O LAYOUT DO SITE ORIGINAL ---
+# --- CSS: LAYOUT, BOLAS TRANSPARENTES E EFEITO VIDRO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-    html, body, [class*="css"] {
+    /* Fundo com as bolas da clínica */
+    html, body, [data-testid="stAppViewContainer"] {
         font-family: 'Inter', sans-serif;
         background-color: #f4f7f6;
+        background-image: 
+            radial-gradient(circle at 10% 10%, rgba(30, 58, 90, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(108, 117, 125, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(30, 58, 90, 0.04) 0%, transparent 60%);
+        background-attachment: fixed;
     }
 
     .main-header {
@@ -27,12 +33,15 @@ st.markdown("""
         color: #1a2a3a;
     }
 
+    /* Efeito Vidro nos Containers */
     div[data-testid="stVerticalBlock"] > div:has(div.stAlert) {
-        background-color: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        border: 1px solid #e0e0e0;
+        background-color: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     .stButton>button {
@@ -52,11 +61,15 @@ st.markdown("""
         color: white;
     }
 
+    /* Área de Texto (Evolução) - Forçando a cor do texto para visibilidade */
     .stTextArea textarea {
         border-radius: 8px !important;
         border: 1px solid #ced4da !important;
-        background-color: #ffffff !important;
-        font-size: 16px;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        color: #1a2a3a !important; /* Cor azul escuro/preto para o texto */
+        font-size: 16px !important;
+        -webkit-text-fill-color: #1a2a3a !important; /* Garante a cor em navegadores Safari/iOS */
+    }
     }
 
     h1, h2, h3 {
@@ -66,10 +79,9 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CARREGAMENTO DO MODELO (USANDO SMALL PARA MAIOR PRECISÃO) ---
+# --- CARREGAMENTO DO MODELO (SMALL) ---
 @st.cache_resource
 def load_model():
-    # Trocamos para 'small' para resolver as 'coisas aleatórias' que as cobaias relataram
     return whisper.load_model("small")
 
 model = load_model()
@@ -96,10 +108,8 @@ if audio_data:
         with open(temp_file, "wb") as f:
             f.write(audio_data['bytes'])
         
-        # PROMPT: Guia a IA para o vocabulário da clínica e evita erros comuns
-        contexto_clinico = "Evolução clínica, prontuário, paciente, terapia, sessão, conduta terapêutica, queixa, desenvolvimento, TEA, ABA, psicóloga."
+        contexto_clinico = "Evolução clínica, prontuário, paciente, terapia, sessão, conduta terapêutica, queixa, desenvolvimento, TEA, ABA, psicóloga, Neurointegrando."
         
-        # Transcrição Otimizada
         result = model.transcribe(
             temp_file, 
             fp16=False, 
