@@ -6,68 +6,108 @@ import time
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
-    page_title="Mic To Text - Neurointegrando",
+    page_title="Neuro | Mic To Text",
     page_icon="🎙️",
     layout="centered"
 )
 
-# --- CSS: CAMUFLAGEM E ESTILO ---
+# --- CSS: ESTÉTICA APPLE (MINIMALISTA PREMIUM) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* 1. FUNDO BRANCO PARA CAMUFLAR O COMPONENTE DE ÁUDIO */
+    /* 1. FUNDO E TIPOGRAFIA BASE */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', sans-serif !important;
         background-color: #ffffff !important;
-        color: #1a2a3a !important;
+        color: #1d1d1f !important; /* Cor de texto padrão Apple */
     }
 
-    /* 2. REINSERINDO AS BOLAS DA CLÍNICA COMO DETALHE SUAVE NO FUNDO */
-    [data-testid="stAppViewContainer"] {
-        background-image: 
-            radial-gradient(circle at 10% 10%, rgba(30, 58, 90, 0.05) 0%, transparent 40%),
-            radial-gradient(circle at 90% 80%, rgba(108, 117, 125, 0.05) 0%, transparent 40%) !important;
-        background-attachment: fixed;
+    /* 2. TÍTULOS IMPACTANTES */
+    .main-title {
+        font-weight: 700;
+        font-size: 52px;
+        letter-spacing: -1.5px;
+        text-align: center;
+        margin-top: 40px;
+        color: #1d1d1f;
+        margin-bottom: 5px;
+    }
+    .sub-title {
+        font-weight: 400;
+        font-size: 22px;
+        color: #86868b;
+        text-align: center;
+        margin-bottom: 50px;
+        letter-spacing: -0.5px;
     }
 
-    /* 3. LIMPANDO O COMPONENTE DE GRAVAÇÃO (MATA A BARRA BRANCA) */
+    /* 3. CAMUFLAGEM DO GRAVADOR E CARDS */
     div.element-container:has(iframe) {
         background-color: transparent !important;
         border: none !important;
-        box-shadow: none !important;
+        padding: 10px 0 !important;
     }
 
-    iframe {
-        border: none !important;
-        background-color: transparent !important;
-    }
-
-    /* 4. ÁREA DE TEXTO */
+    /* Estilização da Área de Texto (Soft Shadow) */
     .stTextArea textarea {
-        border-radius: 8px !important;
-        border: 1px solid #e0e0e0 !important;
-        background-color: #ffffff !important;
-        color: #1a2a3a !important;
-        font-size: 16px !important;
+        border-radius: 18px !important;
+        border: 1px solid #d2d2d7 !important;
+        background-color: #fbfbfd !important;
+        color: #1d1d1f !important;
+        font-size: 17px !important;
+        padding: 20px !important;
+        line-height: 1.5 !important;
+        box-shadow: none !important;
+        transition: border-color 0.3s ease;
+    }
+    .stTextArea textarea:focus {
+        border-color: #0071e3 !important;
     }
 
-    /* 5. BOTÃO LIMPAR (AZUL E BRANCO) */
+    /* 4. BOTÕES ESTILO macOS/iOS */
     .stButton>button {
         width: 140px !important;
-        border-radius: 8px !important;
-        background-color: white !important;
-        color: #1e3a5a !important;
-        font-weight: 700 !important;
-        border: 2px solid #1e3a5a !important;
-    }
-    
-    .stButton>button:hover {
-        background-color: #1e3a5a !important;
+        border-radius: 12px !important;
+        height: 44px !important;
+        background-color: #0071e3 !important; /* Azul Clássico Apple */
         color: white !important;
+        font-weight: 500 !important;
+        font-size: 15px !important;
+        border: none !important;
+        transition: all 0.2s ease;
+    }
+    .stButton>button:hover {
+        background-color: #0077ed !important;
+        opacity: 0.9;
     }
 
-    h1, h2, h3, p, label, span { color: #1e3a5a !important; }
+    /* Botão secundário (Lixeira/Limpar) */
+    .stButton:has(button:contains("Limpar")) button {
+        background-color: #f5f5f7 !important;
+        color: #0071e3 !important;
+        border: 1px solid #d2d2d7 !important;
+    }
+
+    /* Customização do componente st.info e st.success para serem mais discretos */
+    .stAlert {
+        background-color: #f5f5f7 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        color: #1d1d1f !important;
+    }
+
+    /* Esconder bordas desnecessárias */
+    hr {
+        border-top: 1px solid #d2d2d7 !important;
+        opacity: 0.5;
+    }
+
+    h3 {
+        font-weight: 600 !important;
+        color: #1d1d1f !important;
+        letter-spacing: -0.5px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -78,19 +118,21 @@ def load_model():
 
 model = load_model()
 
-# --- CONTEÚDO ---
-st.markdown('<div style="text-align:center;"><h1>Mic To Text</h1><p>Neurointegrando</p></div>', unsafe_allow_html=True)
+# --- CONTEÚDO VISUAL ---
+st.markdown('<h1 class="main-title">Mic To Text.</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Sua voz transformada em evolução clínica.</p>', unsafe_allow_html=True)
 
-st.info("🎙️ **Transcrever Evoluções**: Faça o relato da sessão de hoje.")
+# Container Centralizado de Instrução
+st.info("🎙️ **Evoluções em tempo real.** O sistema utiliza IA para transcrever termos técnicos com precisão.")
 
-st.markdown("### 1. Relato da Evolução (Fale agora)")
+st.markdown("### 1. Gravar Relato")
 
 if 'recorder_key' not in st.session_state:
     st.session_state.recorder_key = 0
 
-# Gravador
+# Gravador Camuflado no fundo branco
 audio_data = mic_recorder(
-    start_prompt="🔴 Iniciar Gravação de Voz",
+    start_prompt="🔴 Iniciar Gravação",
     stop_prompt="⏹️ Finalizar e Processar",
     key=f"recorder_{st.session_state.recorder_key}",
     just_once=True
@@ -99,35 +141,38 @@ audio_data = mic_recorder(
 if audio_data:
     st.audio(audio_data['bytes'])
     
-    with st.spinner("🤖 Processando fala..."):
+    with st.spinner("Analisando áudio..."):
         temp_file = f"temp_{int(time.time())}.wav"
         with open(temp_file, "wb") as f:
             f.write(audio_data['bytes'])
         
-        contexto = "Evolução clínica, prontuário, paciente, terapia, sessão, conduta, TEA, ABA, psicóloga, Neurointegrando."
+        contexto = "Evolução clínica, prontuário, paciente, terapia, sessão, conduta, TEA, ABA, psicóloga, Neurointegrando, desenvolvimento infantil."
         result = model.transcribe(temp_file, fp16=False, language="pt", temperature=0.0, initial_prompt=contexto)
         
         texto_gerado = result["text"].strip()
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
-    st.markdown("### 2. Resultado da Transcrição")
-    st.text_area(label="Texto pronto para copiar:", value=texto_gerado, height=350)
+    st.markdown("### 2. Texto Gerado")
+    st.text_area(label="", value=texto_gerado, height=350, label_visibility="collapsed")
 
-    if st.button("🗑️ Limpar"):
-        st.session_state.recorder_key += 1
-        st.rerun()
+    # Layout de botões
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("🗑️ Limpar"):
+            st.session_state.recorder_key += 1
+            st.rerun()
     
-    st.success("💡 Dica: Selecione o texto, copie e cole na evolução (Átrio).")
+    st.success("💡 **Dica:** Copie o texto e cole diretamente no sistema (Átrio).")
 else:
     st.write("---")
-    st.caption("Aguardando gravação...")
+    st.caption("Aguardando entrada de áudio para processamento.")
 
-# --- FOOTER (CORRIGIDO) ---
-st.markdown("<br><hr>", unsafe_allow_html=True)
+# --- FOOTER ---
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="text-align: center; color: #6c757d;">
-        <p>🔒 Sua segurança é nossa prioridade. Nenhum arquivo é armazenado.</p>
-        <p><i>Feito com Carinho pela Equipe Administrativa da Clinica Neurointegrando.</i></p>
+    <div style="text-align: center; color: #86868b; font-size: 13px;">
+        <p>Copyright © 2026 Clínica Neurointegrando. Todos os direitos reservados.</p>
+        <p>🔒 Segurança de nível bancário: seus dados são processados localmente e não são armazenados.</p>
     </div>
 """, unsafe_allow_html=True)
